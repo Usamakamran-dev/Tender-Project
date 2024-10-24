@@ -103,8 +103,8 @@ function TenderForm() {
         <h2 className="text-2xl font-bold mb-4">{translatedTexts.title}</h2>
         <div className="space-y-4 pt-6">
           <Input
-            placeholder='Enter tender name'
-            value={translatedTexts.enterName}
+            placeholder={translatedTexts.enterName}
+            value={newTenderName}
             onChange={(e) => {
               setNewTenderName(e.target.value);
               if (errors.name) setErrors((prev) => ({ ...prev, name: false }));
