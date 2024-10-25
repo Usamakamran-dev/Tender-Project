@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { TenderContext } from './../context/TenderProvider'; 
 
 function TenderHome() {
-  const translate = (text) => {
-    // This is a placeholder translation function
-    const translations = {
-      "Select a tender from the sidebar or create a new one to get started.": "Selecteer een aanbesteding in de zijbalk of maak een nieuwe aan om te beginnen.",
+  const { translate, language } = useContext(TenderContext); // Use context values
+  const [translatedText, setTranslatedText] = useState('');
+
+  useEffect(() => {
+    const fetchTranslation = async () => {
+      const text = await translate(
+        'Select a tender from the sidebar or create a new one to get started.'
+      );
+      setTranslatedText(text);
     };
-    return translations[text] || text;
-  };
+
+    fetchTranslation(); // Fetch translation on component mount or language change
+  }, [translate, language]); // Re-run on language change
 
   return (
     <div className="flex h-screen items-center justify-center text-gray-500">
-      <h1 className="text-md">
-        Select a tender from the sidebar or create a new one to get started
-      </h1>
+      <h1 className="text-md">{translatedText}</h1>
     </div>
   );
 }

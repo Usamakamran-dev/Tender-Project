@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown'; // Import react-markdown
 
 function ChatBox() {
   const navigate = useNavigate();
-  const { selectedTender, setSelectedTender, translate, language } = useContext(TenderContext);
+  const { selectedTender, setSelectedTender, translate, language , getHardcodedTranslation } = useContext(TenderContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false); // Track loading state
@@ -19,8 +19,9 @@ function ChatBox() {
 
   const [translatedTenderName, setTranslatedTenderName] = useState('');
   const [translatedHeaderText, setTranslatedHeaderText] = useState('');
-  const [translatedCloseButtonText, setTranslatedCloseButtonText] = useState('');
-  const [translatedPrompt, setTranslatedPrompt] = useState('');
+  const [translatedCloseButtonText, setTranslatedCloseButtonText] = useState(
+    language === 'NL' ? 'Sluiten' : 'Close' // Set initial value based on language
+  );  const [translatedPrompt, setTranslatedPrompt] = useState('');
   const [fetchingResponseMessage, setFetchingResponseMessage] = useState('');
 
 
@@ -28,16 +29,15 @@ function ChatBox() {
   useEffect(() => {
     const translateTexts = async () => {
       const headerText = await translate('Start a conversation about the tender.');
-      const closeButton = await translate('Close');
+      // const closeButtonText = language === 'NL' ? 'Sluiten' : 'Close';
       const prompt = await translate('Type your message...');
-      const tenderName=await translate(selectedTender);
       const responseMsg = await translate('Fetching response...');
       setTranslatedHeaderText(headerText);
-      setTranslatedCloseButtonText(closeButton);
       setTranslatedPrompt(prompt);
       setTranslatedTenderName(tenderName);
-      setFetchingResponseMessage(responseMsg);      
-      
+      setFetchingResponseMessage(responseMsg); 
+      setTranslatedCloseButtonText(language === 'NL' ? 'Sluiten' : 'Close');
+
     };
 
     translateTexts();
@@ -129,7 +129,7 @@ function ChatBox() {
       <div className='flex flex-row items-center justify-between border-b pb-4'>
         <div className="flex flex-col items-start gap-3">
           <h2 className="text-2xl font-semibold">
-            <span>{translatedTenderName}</span>
+            <span>{selectedTender}</span>
           </h2>
           <p className="text-sm text-gray-600">{translatedHeaderText}</p>
         </div>
@@ -137,7 +137,7 @@ function ChatBox() {
           onClick={handleClose}
           className="text-sm text-red-500 hover:text-red-400 font-medium"
         >
-          {translatedCloseButtonText}
+            {getHardcodedTranslation('Close')}
         </button>
       </div>
 

@@ -10,7 +10,7 @@ import { TenderContext } from '../context/TenderProvider';
 
 function PreviousTenderForm() {
   const navigate = useNavigate();
-  const { translate } = useContext(TenderContext);
+  const { translate , getHardcodedTranslation } = useContext(TenderContext);
 
 
   const [folderName, setFolderName] = useState('');
@@ -103,8 +103,8 @@ function PreviousTenderForm() {
         <h2 className="text-2xl font-bold mb-4">{translatedTexts.title}</h2>
         <div className="space-y-4 pt-6">
           <Input
-            placeholder='Enter folder name'
-            value={translatedTexts.enterFolder}
+            placeholder={translatedTexts.enterFolder}
+            value={folderName}
             onChange={(e) => {
               setFolderName(e.target.value)
               if (errors.name) setErrors((prev) => ({ ...prev, name: false }));
@@ -166,7 +166,8 @@ function PreviousTenderForm() {
         navigate(-1); 
       }}
     >
-      {translatedTexts.close}
+                 {getHardcodedTranslation('Close')}
+
     </Button>
         </DialogContent>
       </Dialog>

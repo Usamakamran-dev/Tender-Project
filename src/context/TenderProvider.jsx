@@ -31,7 +31,20 @@ const toggleLanguage = () => {
 };
 
 
+const getHardcodedTranslation = (text) => {
+  if (language === 'NL') {
+    const hardcodedTranslations = {
+      Close: 'Sluiten', // Hardcoded translation for 'Close'
+    };
+    return hardcodedTranslations[text] || text;
+  }
+  return text;
+};
+
+
+
 const translate = async (text, sourceLang = 'en', targetLang = 'nl') => {
+  setLoadingTranslations(true);
   if (language === 'EN') {
     return text;  // Return the text unchanged if the language is English
   } else {
@@ -56,14 +69,15 @@ const translate = async (text, sourceLang = 'en', targetLang = 'nl') => {
       if (!response.ok) {
         console.error('Translation API error:', data);
         throw new Error(`Failed to translate text: ${data.error.message}`);
+      }else
+      {
+        setLoadingTranslations(false); // Start loading
+        return data.data.translations[0].translatedText;
       }
 
-      return data.data.translations[0].translatedText;
     } catch (error) {
       console.error('Error during translation:', error);
       return text;  // Return original text as a fallback to ensure user experience continuity
-    }finally {
-      setLoadingTranslations(false); // End loading
     }
   }
 };
@@ -127,7 +141,8 @@ useEffect(() => {
     language,
     setLanguage,
     toggleLanguage,
-    translate
+    translate,
+    getHardcodedTranslation
   };
 
   return (

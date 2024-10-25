@@ -11,7 +11,7 @@ import Loader from '../components/Loader';
 
 function TenderForm() {
   const navigate = useNavigate();
-  const { setApiCall , translate } = useContext(TenderContext); 
+  const { setApiCall , translate , getHardcodedTranslation} = useContext(TenderContext); 
   const [newTenderName, setNewTenderName] = useState('');
   const [newTenderDescription, setNewTenderDescription] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -178,8 +178,8 @@ function TenderForm() {
         }, 500); // Optional small delay before reload
       }}
     >
-       {translatedTexts.close}
-    </Button>
+            {getHardcodedTranslation('Close')}
+            </Button>
         </DialogContent>
       </Dialog>
     </div>

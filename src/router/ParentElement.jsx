@@ -23,6 +23,8 @@ function ParentElement() {
       </div>
 
       {contextValue.showChatIcon && <ChatIcon />}
+
+      
     </div>
   );
 }

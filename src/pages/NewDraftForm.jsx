@@ -9,7 +9,7 @@ import Loader from '../components/Loader'; // Importing the Loader
 
 
 function NewDraftForm() {
-  const { selectedTender , translate } = useContext(TenderContext);
+  const { selectedTender , translate , getHardcodedTranslation } = useContext(TenderContext);
   const navigate = useNavigate();
   const [draftData, setDraftData] = useState({
     subject: "",
@@ -245,7 +245,7 @@ function NewDraftForm() {
               <div className="text-green-600 text-2xl">{translatedTexts.draftAdded}</div>
               <Button className="mt-8 bg-black text-white px-4 py-2 rounded-md"
               onClick={() => setIsDialogOpen(false)}>
-                {translatedTexts.close}
+                 {getHardcodedTranslation('Close')}
                 </Button>
             </DialogContent>
           </Dialog>

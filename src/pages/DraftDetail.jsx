@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react'; // Import Loader2 from lucide-react
 
 
 const DraftDetail = () => {
-  const { selectedDraft, selectedTender , translate } = useContext(TenderContext);
+  const { selectedDraft, selectedTender , translate ,  getHardcodedTranslation } = useContext(TenderContext);
   const { id } = useParams();
   const [draftText, setDraftText] = useState('');
   const [isPreviousTendersOpen, setIsPreviousTendersOpen] = useState(false);
@@ -356,7 +356,7 @@ useEffect(() => {
                 className="text-black font-medium text-sm border border-black border-opacity-40 px-4 py-2 rounded-md hover:bg-gray-50"
                 onClick={() => setIsTextModificationOpen(false)}
               >
-               {translatedTexts.close}
+                 {getHardcodedTranslation('Close')}
               </Button>
               <Button
                 className="text-white font-medium text-xs border border-black border-opacity-40 px-4 py-2 rounded-md bg-gray-950 hover:bg-gray-900"
