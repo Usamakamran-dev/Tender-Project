@@ -325,7 +325,7 @@ useEffect(() => {
                 onClick={() => handleTextModification(option)}
                 className="p-2 w-full text-sm text-left text-white hover:bg-gray-800 rounded"
               >
-                {translatedTexts[option] || option}
+                {translatedTexts[option.toLowerCase()] || option} {/* Ensure correct key lookup */}
               </Button>
             ))}
           </div>

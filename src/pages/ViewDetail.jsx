@@ -3,8 +3,12 @@ import { Trash2 , ArrowUpDown } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Loader from '../components/Loader'; 
 import { TenderContext } from '../context/TenderProvider'; 
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
-function PreviousTenderDetail() {
+
+function ViewDetail() {
+  const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -12,8 +16,9 @@ function PreviousTenderDetail() {
   const [sortAsc, setSortAsc] = useState(true); 
   const [sortAscDate, setSortAscDate] = useState(true);
 
-  const { selectedFolder, setSelectedFolder , translate } = useContext(TenderContext);
-
+  const { selectedTenderDoc, setSelectedTenderDoc , translate , selectedTender , setSelectedTender , showChatModel,
+    setShowChatModel } = useContext(TenderContext);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
 
 // State to store translated texts
@@ -24,7 +29,37 @@ const [translations, setTranslations] = useState({
   cancelText: '',
   deleteText: '',
   confirmDeleteTitle: '',
+  uploadDocument:''
 });
+
+useEffect(() => {
+  setShowChatModel(true); // Always set the chat model to visible when navigating to this page
+}, [showChatModel]);
+
+
+
+
+useEffect(() => {
+  if (selectedTenderDoc) {
+    localStorage.setItem('selectedTenderDoc', JSON.stringify(selectedTenderDoc));
+  }
+}, [selectedTenderDoc]);
+
+
+useEffect(() => {
+  if (selectedTender) {
+    localStorage.setItem('selectedTender', selectedTender);
+  }
+}, [selectedTender]);
+
+
+
+useEffect(() => {
+  const savedTender = localStorage.getItem('selectedTender');
+  if (savedTender) {
+    setSelectedTender(savedTender);
+  }
+}, [setSelectedTender]);
 
 
 useEffect(() => {
@@ -45,6 +80,7 @@ useEffect(() => {
       cancelText: await translate('Cancel'),
       deleteText: await translate('Delete'),
       confirmDeleteTitle: await translate('Confirm Delete'),
+      uploadDocument: await translate('+ Upload Additional Document'),
     });
   };
 
@@ -62,9 +98,11 @@ useEffect(() => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file_name', selectedDoc.name);
+      formData.append('source', selectedTender);
+      formData.append('file_name', selectedDoc.file_name);
 
-      const response = await fetch('http://68.221.120.250:8000/delete_previous_file', {
+
+      const response = await fetch('http://68.221.120.250:8000/delete_current_file', {
         method: 'POST',
         body: formData,
       });
@@ -75,8 +113,8 @@ useEffect(() => {
 
       console.log(`File "${selectedDoc.name}" deleted successfully`);
 
-      const updatedFolder = selectedFolder.documents.filter(doc => doc.id !== selectedDoc.id);
-      setSelectedFolder({ ...selectedFolder, documents: updatedFolder });
+      const updatedFolder = selectedTenderDoc.filter(doc => doc.id !== selectedDoc.id);
+      setSelectedTenderDoc(updatedFolder);
 
       setShowDeleteModal(false);
     } catch (error) {
@@ -99,7 +137,7 @@ useEffect(() => {
         return b.name.localeCompare(a.name);
       }
     });
-    setSelectedFolder({ ...selectedFolder, documents: sortedDocuments });
+    setSelectedTenderDoc({ ...selectedFolder, documents: sortedDocuments });
     setSortAsc(!sortAsc); // Toggle sort direction
   };
 
@@ -111,8 +149,44 @@ useEffect(() => {
       const dateB = new Date(b.uploadDate);
       return sortAscDate ? dateA - dateB : dateB - dateA;
     });
-    setSelectedFolder({ ...selectedFolder, documents: sortedDocuments });
+    setSelectedTenderDoc({ ...selectedFolder, documents: sortedDocuments });
     setSortAscDate(!sortAscDate); // Toggle sort direction for date
+  };
+
+
+
+  const uploadDocument = async () => {
+    setLoading(true); // Show loader
+    try {
+      const formData = new FormData();
+      formData.append('document', uploadedFile); // Append the file
+      formData.append('tenderName', selectedTender); // Append tender name
+  
+      const response = await fetch('http://68.221.120.250:8000/upload_document', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to upload the document');
+      }
+  
+      console.log('Document uploaded successfully');
+      setUploadedFile(null); // Reset file state after successful upload
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    } finally {
+      setLoading(false); // Hide loader
+    }
+  };
+  
+
+  
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]; // Get the selected file
+    if (file) {
+      setUploadedFile(file); // Store the file in state
+    }
   };
 
 
@@ -121,21 +195,30 @@ useEffect(() => {
     <div className="p-6 bg-white text-white rounded-lg shadow-md flex flex-col gap-12 h-full">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-gray-950">
-          {selectedFolder.folderName}
+          {selectedTender}
         </h1>
+        <div onClick={() => navigate('/additional-tender-form')}
+        className="flex justify-between items-center">
+               
+                <label
+                  className="text-black font-medium text-sm border border-black border-opacity-10 px-3 py-2 rounded-md hover:bg-gray-50 cursor-pointer"
+                >
+                  {translations.uploadDocument}
+                </label>
+             </div>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-40">
           <Loader />
         </div>
-      ) : selectedFolder.documents.length > 0 ? (
+      ) : selectedTenderDoc.length > 0 ? (
         <table className="min-w-full bg-white rounded-lg">
            <thead>
             <tr className="text-left border-b border-gray-300">
-              <th className="p-3 text-sm text-gray-950 font-semibold">{translations.headers.nr}</th>
+              <th className="p-3 text-sm text-gray-950 font-semibold text-nowrap">{translations.headers.nr}</th>
               <th 
-                className="p-3 text-sm text-gray-950 font-semibold cursor-pointer flex items-center gap-2"
+                className="p-3 text-sm text-gray-950 font-semibold cursor-pointer flex items-center gap-2 text-nowrap"
                 onClick={handleSortByDate}
               >
                 {translations.headers.uploadDate}
@@ -145,7 +228,7 @@ useEffect(() => {
                   }`}
                 />
               </th>
-              <th className="p-3 text-sm text-gray-950 font-semibold"> {translations.headers.type}</th>
+              <th className="p-3 text-sm text-gray-950 font-semibold text-nowrap"> {translations.headers.type}</th>
               <th 
                 className="p-3 text-sm text-gray-950 font-semibold cursor-pointer flex items-center gap-2" 
                 onClick={handleSortByName}
@@ -157,19 +240,19 @@ useEffect(() => {
                   }`}
                 /> {/* Double arrow icon with rotation */}
               </th>
-              <th className="p-3 text-sm text-gray-950 font-semibold">  {translations.headers.size}</th>
-              <th className="p-3 text-sm text-gray-950 font-semibold"> {translations.headers.actions}</th>
+              <th className="p-3 text-sm text-gray-950 font-semibold text-nowrap">  {translations.headers.size}</th>
+              <th className="p-3 text-sm text-gray-950 font-semibold text-nowrap"> {translations.headers.actions}</th>
             </tr>
           </thead>
           <tbody>
-            {selectedFolder.documents.map((doc, index) => (
+            {selectedTenderDoc.map((doc, index) => (
               <tr key={doc.id} className="border-b border-gray-300 hover:bg-gray-50">
-                <td className="p-3 text-sm text-gray-500">{index + 1}</td>
-                <td className="p-3 text-sm text-gray-500">{doc.uploadDate}</td>
-                <td className="p-3 text-sm text-gray-500">{doc.type}</td>
-                <td className="p-3 text-sm text-gray-500">{doc.name}</td>
-                <td className="p-3 text-sm text-gray-500">{doc.size}</td>
-                <td className="p-3 text-sm text-gray-500">
+                <td className="p-3 text-sm text-gray-500 text-nowrap">{index + 1}</td>
+                <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.upload_date}</td>
+                <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.document_type}</td>
+                <td className="p-3 text-sm text-gray-500 ">{doc.file_name}</td>
+                <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.size}</td>
+                <td className="p-3 text-sm text-gray-500 text-nowrap">
                   <button
                     className="text-red-600 hover:text-red-400"
                     onClick={() => handleDeleteClick(doc)}
@@ -194,7 +277,7 @@ useEffect(() => {
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
             <h2 className="text-lg font-semibold mb-4 text-gray-950"> {translations.confirmDeleteTitle}</h2>
             <p className="mb-8 text-gray-700 font-regular text-sm">
-            {translations.confirmDeleteMessage.replace('{name}', selectedDoc?.name)}
+            {translations.confirmDeleteMessage.replace('{name}', selectedDoc?.file_name)}
             </p>
             <div className="flex justify-end space-x-4">
               <Button   className="text-black font-medium text-sm border border-black border-opacity-40 px-4 py-2 rounded-md hover:bg-gray-50"
@@ -211,4 +294,4 @@ useEffect(() => {
   );
 }
 
-export default PreviousTenderDetail;
+export default ViewDetail;

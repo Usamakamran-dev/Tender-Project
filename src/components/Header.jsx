@@ -18,15 +18,13 @@ function Header() {
    const [translatedDashboard, setTranslatedDashboard] = useState('');
    const [translatedUploads, setTranslatedUploads] = useState('');
  
-   // Function to load translations
-   const loadTranslations = async () => {
-     setTranslatedDashboard(await translate('Tender Dashboard'));
-     setTranslatedUploads(await translate('Previous tenders Upload'));
-   };
-
    useEffect(() => {
+    const loadTranslations = async () => {
+      setTranslatedDashboard(await translate('Tender Dashboard'));
+      setTranslatedUploads(await translate('Previous tenders Upload'));
+    };
     loadTranslations();
-  }, [language]);  // Depend on language to re-trigger t
+  }, [language]);
  
 
   const tenderIconClick= () => {

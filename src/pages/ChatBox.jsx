@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown'; // Import react-markdown
 
 
-function ChatBox() {
+function ChatBox({ onClose }) {
   const navigate = useNavigate();
   const { selectedTender, setSelectedTender, translate, language , getHardcodedTranslation } = useContext(TenderContext);
   const [messages, setMessages] = useState([]);
@@ -17,31 +17,28 @@ function ChatBox() {
   const chatEndRef = useRef(null); // Ref to scroll to the bottom
 
 
-  const [translatedTenderName, setTranslatedTenderName] = useState('');
   const [translatedHeaderText, setTranslatedHeaderText] = useState('');
-  const [translatedCloseButtonText, setTranslatedCloseButtonText] = useState(
-    language === 'NL' ? 'Sluiten' : 'Close' // Set initial value based on language
-  );  const [translatedPrompt, setTranslatedPrompt] = useState('');
-  const [fetchingResponseMessage, setFetchingResponseMessage] = useState('');
+  const [translatedPrompt, setTranslatedPrompt] = useState('');
+  const [fetchingResponseMessage, setFetchingResponseMessage] = useState('Fetching ....');
 
 
 
   useEffect(() => {
     const translateTexts = async () => {
       const headerText = await translate('Start a conversation about the tender.');
-      // const closeButtonText = language === 'NL' ? 'Sluiten' : 'Close';
       const prompt = await translate('Type your message...');
       const responseMsg = await translate('Fetching response...');
+      const fetchingMsg = await translate('Fetching ....');  // New translation
+  
       setTranslatedHeaderText(headerText);
       setTranslatedPrompt(prompt);
-      setTranslatedTenderName(tenderName);
-      setFetchingResponseMessage(responseMsg); 
+      setFetchingResponseMessage(fetchingMsg); 
       setTranslatedCloseButtonText(language === 'NL' ? 'Sluiten' : 'Close');
-
     };
-
+  
     translateTexts();
   }, [language, translate]);
+  
 
 
 
@@ -116,33 +113,31 @@ function ChatBox() {
     }
   };
 
-  const handleClose = () => {
-    navigate(-1);
-  };
-
+  
 
 
 
 
   return (
-    <div className="bg-white shadow-md p-6 rounded-lg w-full flex flex-col gap-8">
+    <div className="flex flex-col gap-8 absolute bottom-16 right-0 w-[30rem] h-[30rem] bg-white p-4 rounded-lg shadow-lg
+      overflow-auto">
       <div className='flex flex-row items-center justify-between border-b pb-4'>
-        <div className="flex flex-col items-start gap-3">
-          <h2 className="text-2xl font-semibold">
+        <div className="flex flex-col items-start gap-1">
+          <h2 className="text-xl font-semibold">
             <span>{selectedTender}</span>
           </h2>
-          <p className="text-sm text-gray-600">{translatedHeaderText}</p>
+          <p className="text-xs text-gray-600">{translatedHeaderText}</p>
         </div>
         <button
-          onClick={handleClose}
-          className="text-sm text-red-500 hover:text-red-400 font-medium"
+         onClick={onClose}
+          className="text-xs text-red-500 hover:text-red-400 font-medium"
         >
             {getHardcodedTranslation('Close')}
         </button>
       </div>
 
-      <div className="flex flex-col h-[400px]">
-        <ScrollArea className="flex-1 rounded-md">
+      <div className="flex flex-col h-full">
+        <ScrollArea className="flex-1 rounded-md h-full">
           <div className="space-y-2 pr-4">
             {messages.map((message) => (
               <div
@@ -156,7 +151,7 @@ function ChatBox() {
                     message.sender === "sent"
                       ? "bg-gray-950 text-white"
                       : "bg-gray-200 text-black"
-                  } rounded p-3 max-w-lg break-words text-sm`}
+                  } rounded p-2 max-w-2xl break-words text-xs h-full`}
                 >
                   <ReactMarkdown>{message.text}</ReactMarkdown> {/* Render Markdown */}
                 </div>
@@ -164,23 +159,24 @@ function ChatBox() {
             ))}
             <div ref={chatEndRef} /> {/* Ref for auto-scrolling */}
             {loading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-200 text-black rounded p-3 max-w-lg text-sm flex items-center">
-                  <Loader className="animate-spin mr-2 h-5 w-5" />
-                  {fetchingResponseMessage}
+              <div className="flex justify-start items-center">
+                <div className="bg-gray-200 text-black rounded p-2 w-auto text-sm flex items-center space-x-2">
+                  <Loader className="animate-spin h-4 w-4" />
+                  <span className='text-gray-950 text-xs font-semibold'>{fetchingResponseMessage}</span>
                 </div>
               </div>
             )}
+
           </div>
         </ScrollArea>
       </div>
 
       
 
-      <form className="flex items-center gap-3" onSubmit={handleSendMessage}>
+      <form className="flex items-center justify-end gap-3" onSubmit={handleSendMessage}>
         <Input
           placeholder={translatedPrompt}
-          className="text-sm rounded py-3 border w-full text-gray-600 border-gray-300"
+          className="text-xs rounded py-2 border w-full text-gray-600 border-gray-300"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           disabled={loading}
@@ -188,7 +184,7 @@ function ChatBox() {
         <Button
           type="submit"
           size="icon"
-          className="bg-gray-950 p-3 rounded border-2 border-black"
+          className="bg-gray-950 p-2 rounded border-2 border-black"
           disabled={loading}
         >
           {loading ? (

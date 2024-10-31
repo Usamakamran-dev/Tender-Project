@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import Button from '../components/ui/Button';
-import { Upload } from 'lucide-react'; // Icons from Lucide-react
+import { Upload ,  Trash2 } from 'lucide-react'; // Icons from Lucide-react
 import { Dialog, DialogContent } from './../components/ui/Dialog';
 import { TenderContext } from '../context/TenderProvider';
 import Loader from '../components/Loader';
@@ -51,11 +51,18 @@ function TenderForm() {
     }
   };
 
+
+  const handleDeleteFile = (index) => {
+    const updatedFiles = uploadedFiles.filter((_, i) => i !== index);
+    setUploadedFiles(updatedFiles);
+  };
+
+
+
   const handleSubmit = async () => {
     const errors = {};
     if (!newTenderName) errors.name = true;
     if (!newTenderDescription) errors.description = true;
-    if (uploadedFiles.length === 0) errors.documents = true;
     setErrors(errors);
 
     if (Object.keys(errors).length === 0) {
@@ -63,7 +70,14 @@ function TenderForm() {
         setLoading(true); // Start loading
         const formData = new FormData();
         formData.append('path_db', newTenderName);
-        uploadedFiles.forEach((file) => formData.append('files', file));
+
+        if (uploadedFiles.length > 0) {
+          uploadedFiles.forEach((file) => formData.append('files', file));
+        } else {
+          const emptyFile = new Blob([], { type: 'application/octet-stream' });
+          formData.append('files', emptyFile, 'empty-file.txt');
+        }
+        
 
         const response = await fetch('http://68.221.120.250:8000/current_tender_upload', {
           method: 'POST',
@@ -140,15 +154,24 @@ function TenderForm() {
           </div>
 
           {uploadedFiles.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium">{translatedTexts.uploadedFiles}</h4>
-              <ul className="text-sm text-gray-500">
-                {uploadedFiles.map((file, index) => (
-                  <li key={index}>{file.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+              <div>
+                <h4 className="text-sm font-medium">{translatedTexts.uploadedFiles}</h4>
+                <ul className="text-sm text-gray-500">
+                  {uploadedFiles.map((file, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <span>{file.name}</span>
+                      <button
+                        onClick={() => handleDeleteFile(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
 
           <div className="flex justify-end space-x-2">
             <Button  onClick={() => navigate(-1)}

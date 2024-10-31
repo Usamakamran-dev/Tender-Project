@@ -12,27 +12,25 @@ function PreviousTender() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [translatedTitle, setTranslatedTitle] = useState('');
-  const [translatedUploadText, setTranslatedUploadText] = useState('');
-  const [translatedNoFoldersMessage, setTranslatedNoFoldersMessage] = useState('');
-  const [translatedErrorMessage, setTranslatedErrorMessage] = useState('');
-  const [documentText, setDocumentText] = useState('');
+  const [translations, setTranslations] = useState({
+    title: '',
+    uploadText: '',
+    noFoldersMessage: '',
+    errorMessage: '',
+    documentText: '',
+  });
 
 
   useEffect(() => {
     const loadTranslations = async () => {
-      const title = await translate('Upload Previous Tenders');
-      const uploadText = await translate('+ Upload NEW Documents');
-      const noFoldersMessage = await translate('No folders available.');
-      const errorMessage = await translate('Failed to fetch documents.');
-      const text=await translate('Document');
-
-
-      setTranslatedTitle(title);
-      setTranslatedUploadText(uploadText);
-      setTranslatedNoFoldersMessage(noFoldersMessage);
-      setTranslatedErrorMessage(errorMessage);
-      setDocumentText(text);
+      const newTranslations = {
+        title: await translate('Upload Previous Tenders'),
+        uploadText: await translate('+ Upload NEW Documents'),
+        noFoldersMessage: await translate('No folders available.'),
+        errorMessage: await translate('Failed to fetch documents.'),
+        documentText: await translate('Document'),
+      };
+      setTranslations(newTranslations);
     };
 
     loadTranslations();
@@ -99,13 +97,13 @@ function PreviousTender() {
   return (
     <div className="bg-white p-6 rounded-lg shadow flex flex-col items-start gap-12">
       <div className="flex w-full justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-950">{translatedTitle}</h1>
+        <h1 className="text-2xl font-semibold text-gray-950">{translations.title}</h1>
         
         <label
           onClick={() => navigate('/previous-tender-form')}
           className="text-black font-medium text-sm border border-black border-opacity-10 px-3 py-2 rounded-md hover:bg-gray-50 cursor-pointer"
         >
-            {translatedUploadText}
+               {translations.uploadText}
         </label>
       </div>
 
@@ -127,7 +125,7 @@ function PreviousTender() {
               <FileText className="h-6 w-6 mb-2" />
               <span className="font-semibold">{folder}</span>
               <p className="text-sm text-gray-600">
-                {groupedDocuments[folder].length} {documentText}
+              {groupedDocuments[folder].length} {translations.documentText}
               </p>
             </Button>
           ))}
@@ -135,7 +133,7 @@ function PreviousTender() {
       ) : (
         <div className="flex items-center justify-center h-40 w-full">
           <p className="text-sm text-center  font-light text-gray-500">
-          {translatedNoFoldersMessage}
+          {translations.noFoldersMessage}
           </p>
         </div>
       )}

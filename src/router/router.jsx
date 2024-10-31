@@ -7,10 +7,12 @@ const TenderForm = React.lazy(() => import('./../pages/TenderForm.jsx'));
 const TenderDrafts = React.lazy(() => import('./../pages/TenderDrafts.jsx'));
 const DraftDetail = React.lazy(() => import('./../pages/DraftDetail.jsx'));
 const NewDraftForm = React.lazy(() => import('./../pages/NewDraftForm.jsx'));
-const ChatBox = React.lazy(() => import('./../pages/ChatBox.jsx'));
 const PreviousTender = React.lazy(() => import('./../pages/PreviousTender.jsx'));
 const PreviousTenderDetail=React.lazy(() => import('./../pages/PreviousTenderDetail.jsx'));
 const PreviousTenderForm=React.lazy(() => import('./../pages/PreviousTenderForm.jsx'));
+const ViewDetail=React.lazy(() => import('./../pages/ViewDetail.jsx'));
+const AdditionalDocumentForm=React.lazy(() => import('./../pages/AdditionalDocumentForm'));
+
 
 
 const router = createBrowserRouter([
@@ -37,11 +39,8 @@ const router = createBrowserRouter([
       {
         path: 'draft/:id',
         element: <DraftDetail />,
-      },
-      {
-        path: 'chat-box',
-        element: <ChatBox />,
-      },
+      }
+      ,
       {
         path: 'previous-tenders',
         element: <PreviousTender />,
@@ -53,7 +52,17 @@ const router = createBrowserRouter([
       {
         path: 'previous-tender-form',
         element: <PreviousTenderForm />,
-      },
+      }
+      ,
+      {
+        path: 'additional-tender-form',
+        element: <AdditionalDocumentForm />,
+      }
+      ,
+      {
+        path: 'document-detail/:id',  
+        element: <ViewDetail />,
+      }
     ],
   },
 ]);

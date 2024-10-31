@@ -11,7 +11,7 @@ import { Loader2 } from 'lucide-react'; // Import Loader icon
 
 function TenderDrafts() {
   const navigate = useNavigate();
-  const { selectedTender , setSelectedTender, setSelectedDraft , fetchTenders , translate} = useContext(TenderContext); // Get selected tender from context
+  const { selectedTender , setSelectedTender, setSelectedDraft , fetchTenders , translate , setSelectedTenderDoc , setShowChatIcon , refreshFlag} = useContext(TenderContext); // Get selected tender from context
   const [loading, setLoading] = useState(true); // Loading state
   const [draftDetails, setDraftDetails] = useState([]); // Store fetched drafts
   const [error, setError] = useState(null); // Error state
@@ -60,6 +60,7 @@ useEffect(() => {
       tenderSubject: await translate('Tender Subject'),  // Draft subject title
       newTenderNamePlaceholder: await translate('New Tender Name'),  // Placeholder for tender input
       newDraftNamePlaceholder: await translate('New Draft Name'),  // Placeholder for draft input
+      confirmEdit: await translate('Confirm Edit'),  // Added Confirm Edit translation
     };
     setTranslatedTexts(translations);
   };
@@ -112,8 +113,17 @@ useEffect(() => {
 
 
         const result = await response.json();
-        setDraftDetails(result.source || []); // Store fetched data or empty array
-        setTotalDocs(result.doc_count);
+
+       // Filter out 'empty-file.txt' from the file_list
+      const filteredFileList = result.file_list.filter(
+        (file) => file.file_name !== 'empty-file.txt'
+      );
+
+        setSelectedTenderDoc(filteredFileList); // Update tender documents with filtered list
+        setTotalDocs(filteredFileList.length);
+        setDraftDetails(result.source || []);
+        console.log(result);
+        setShowChatIcon(true);
         console.log('Draft Details:', result.source);
       } catch (err) {
         setError(err.message); // Handle error
@@ -145,38 +155,8 @@ useEffect(() => {
 
   // ..........................................
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0]; // Get the selected file
-    if (file) {
-      setUploadedFile(file); // Store the file in state
-    }
-  };
 
-  const uploadDocument = async () => {
-    setLoading(true); // Show loader
-    try {
-      const formData = new FormData();
-      formData.append('document', uploadedFile); // Append the file
-      formData.append('tenderName', selectedTender); // Append tender name
-  
-      const response = await fetch('http://68.221.120.250:8000/upload_document', {
-        method: 'POST',
-        body: formData,
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to upload the document');
-      }
-  
-      console.log('Document uploaded successfully');
-      setUploadedFile(null); // Reset file state after successful upload
-    } catch (error) {
-      console.error('Error uploading document:', error);
-    } finally {
-      setLoading(false); // Hide loader
-    }
-  };
-  
+ 
 
   // .............................................
   const handleNewDraft = () => {
@@ -384,29 +364,15 @@ const applyDraftDelete = async () => {
             </div>
         </div>
         <div className='flex flex-row items-center gap-8'>
-             {/* <div className="flex justify-between items-center">
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  id="upload-input"
-                  onChange={handleFileChange} // Handle file selection
-                />
-                <label
-                  htmlFor="upload-input"
-                  className="text-black font-medium text-sm border border-black border-opacity-10 px-3 py-2 rounded-md hover:bg-gray-50 cursor-pointer"
-                >
-                  + Upload Additional Document
-                </label>
-             </div> */}
+             
             <p className="text-gray-600 text-sm">{translatedTexts.totalDocuments} {totalDocs}</p>
-              {/* <Button
-                className="text-white font-medium text-xs px-4 py-2 rounded-md bg-gray-950 hover:bg-gray-900"
-                onClick={uploadDocument} // Call the upload function
+              <Button
+               onClick={() => navigate(`/document-detail/${selectedTender}`, { state: { refresh: true } })}
+               className="text-white font-medium text-xs px-4 py-2 rounded-md bg-gray-950 hover:bg-gray-900"
                 disabled={loading} // Disable button during loading
               >
-                View Now
-              </Button> */}
+               {translatedTexts.viewNow}
+              </Button>
         </div>
       </div>
 

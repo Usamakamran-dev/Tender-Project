@@ -18,8 +18,8 @@ function Sidebar() {
   const navigate = useNavigate();
   const [translatedTexts, setTranslatedTexts] = useState({});
 
-   // Load translations for static texts
-   useEffect(() => {
+  // Load translations for static texts
+  useEffect(() => {
     const loadTranslations = async () => {
       const translations = {
         startNewTender: await translate('Start New Tender'),
