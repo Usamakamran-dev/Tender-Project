@@ -128,30 +128,28 @@ useEffect(() => {
 
 
 
-
   const handleSortByName = () => {
-    const sortedDocuments = [...selectedFolder.documents].sort((a, b) => {
+    const sortedDocuments = [...selectedTenderDoc].sort((a, b) => {
       if (sortAsc) {
-        return a.name.localeCompare(b.name);
+        return a.file_name.localeCompare(b.file_name);
       } else {
-        return b.name.localeCompare(a.name);
+        return b.file_name.localeCompare(a.file_name);
       }
     });
-    setSelectedTenderDoc({ ...selectedFolder, documents: sortedDocuments });
+    setSelectedTenderDoc(sortedDocuments); // Update sorted documents
     setSortAsc(!sortAsc); // Toggle sort direction
   };
-
-
-
+  
   const handleSortByDate = () => {
-    const sortedDocuments = [...selectedFolder.documents].sort((a, b) => {
-      const dateA = new Date(a.uploadDate);
-      const dateB = new Date(b.uploadDate);
+    const sortedDocuments = [...selectedTenderDoc].sort((a, b) => {
+      const dateA = new Date(a.upload_date);
+      const dateB = new Date(b.upload_date);
       return sortAscDate ? dateA - dateB : dateB - dateA;
     });
-    setSelectedTenderDoc({ ...selectedFolder, documents: sortedDocuments });
+    setSelectedTenderDoc(sortedDocuments); // Update sorted documents
     setSortAscDate(!sortAscDate); // Toggle sort direction for date
   };
+  
 
 
 
@@ -251,7 +249,9 @@ useEffect(() => {
                 <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.upload_date}</td>
                 <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.document_type}</td>
                 <td className="p-3 text-sm text-gray-500 ">{doc.file_name}</td>
-                <td className="p-3 text-sm text-gray-500 text-nowrap">{doc.size}</td>
+                <td className="p-3 text-sm text-gray-500 text-nowrap">
+                {Number(doc.size).toFixed(2)} MB
+                </td>
                 <td className="p-3 text-sm text-gray-500 text-nowrap">
                   <button
                     className="text-red-600 hover:text-red-400"
