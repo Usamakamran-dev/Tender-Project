@@ -14,7 +14,6 @@ const ViewDetail=React.lazy(() => import('./../pages/ViewDetail.jsx'));
 const AdditionalDocumentForm=React.lazy(() => import('./../pages/AdditionalDocumentForm'));
 
 
-
 const router = createBrowserRouter([
   {
     path: '/',
@@ -23,7 +22,8 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <TenderHome />,
-      },
+      }
+      ,
       {
         path: 'new-tender',
         element: <TenderForm />,
